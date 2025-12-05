@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
-import { getHistory, deleteHistory, clearHistory } from "../store/requestsStore";
+import {
+  getHistory,
+  deleteHistory,
+  clearHistory,
+} from "../store/requestsStore";
 
 export default function HistoryPanel({ onSelect }) {
   const [items, setItems] = useState([]);
 
-  const load = () => setItems(getHistory());
+  const load = async () => {
+    const historyData = await getHistory(); 
+    setItems(Array.isArray(historyData) ? historyData : []);
+  };
 
   useEffect(() => {
     load();
@@ -16,45 +23,48 @@ export default function HistoryPanel({ onSelect }) {
         <h2 className="font-bold text-lg">History</h2>
         <button
           className="text-red-500 text-sm"
-          onClick={() => {
-            clearHistory();
+          onClick={async () => {
+            await clearHistory();
             load();
           }}
         >
           Clear All
         </button>
       </div>
-
-      {items.map((h) => (
-        <div
-          key={h.id}
-          className="p-3 mb-2 border rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
-          onClick={() => onSelect(h)}
-        >
-          <div className="flex justify-between">
-            <span className="font-semibold">{h.method}</span>
-            <span className="text-xs text-gray-500">{h.duration} ms</span>
+      {Array.isArray(items) && items.length > 0 ? (
+        items.map((h) => (
+          <div
+            key={h.id}
+            className="p-3 mb-2 border rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
+            onClick={() => onSelect(h)}
+          >
+            <div className="flex justify-between">
+              <span className="font-semibold">{h.method}</span>
+              <span className="text-xs text-gray-500">{h.duration} ms</span>
+            </div>
+            <div className="text-xs text-gray-600 dark:text-gray-300">
+              {h.url}
+            </div>
+            <div className="flex justify-between mt-1 text-xs">
+              <span>Status: {h.status}</span>
+              <button
+                className="text-red-400"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  await deleteHistory(h.id);
+                  load();
+                }}
+              >
+                ✖
+              </button>
+            </div>
           </div>
-
-          <div className="text-xs text-gray-600 dark:text-gray-300">
-            {h.url}
-          </div>
-
-          <div className="flex justify-between mt-1 text-xs">
-            <span>Status: {h.status}</span>
-            <button
-              className="text-red-400"
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteHistory(h.id);
-                load();
-              }}
-            >
-              ✖
-            </button>
-          </div>
+        ))
+      ) : (
+        <div className="text-center p-8 text-gray-500 dark:text-gray-400">
+          No history recorded yet.
         </div>
-      ))}
+      )}
     </div>
   );
 }

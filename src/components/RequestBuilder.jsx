@@ -61,7 +61,7 @@ const RequestBuilder = ({
   saveRequest,
   loadedRequest,
   activeEnvironmentVars = [],
-  onSendComplete,
+ onHistoryChange,
 }) => {
   const [activeTab, setActiveTab] = useState("Body");
   const tabs = [
@@ -74,7 +74,7 @@ const RequestBuilder = ({
   ];
 
   const [method, setMethod] = useState("GET");
-  const [url, setUrl] = useState("{{base_url}}/users"); // Updated default URL
+  const [url, setUrl] = useState("{{base_url}}/api/requests"); // Updated default URL
   const [params, setParams] = useState([]);
   const [headers, setHeaders] = useState([]);
   const [body, setBody] = useState("{}");
@@ -152,31 +152,29 @@ const sendRequest = async () => {
     setResponse(responseData);
 
     // 🔥 Save to history (corrected)
-    addHistory({
-      method,
-      url,
-      params,
-      headers,
-      body,
-      status: responseData.status,
-      duration: responseData.time,
-    });
+   await addHistory({ // Await addHistory to ensure save is complete
+        method,
+        url,
+        status: responseData.status,
+        duration: responseData.time,
+      });
 
   } catch (error) {
     setResponse({ error: true, message: error.message });
 
-    addHistory({
-      method,
-      url,
-      params,
-      headers,
-      body,
-      status: "Error",
-      duration: 0,
-    });
+ await addHistory({ // Await addHistory to ensure save is complete
+        method,
+        url,
+        status: "Error",
+        duration: 0,
+      });
   }
 
   setLoading(false);
+
+  if (onHistoryChange) {
+      onHistoryChange();
+    }
 };
 
 
@@ -233,7 +231,7 @@ const sendRequest = async () => {
         <div className="border border-indigo-500 rounded hover:bg-indigo-700">
           <button
             onClick={sendRequest}
-            className="px-4 py-2 bg-indigo-600 text-white border border-indigo-600 rounded hover:bg-indigo-700 shadow font-semibold"
+            className="px-4 py-2 bg-indigo-600 text-indigo-500 border border-indigo-600 rounded hover:bg-indigo-700 shadow font-semibold"
             disabled={loading}
           >
             {loading ? "Sending..." : "Send"}

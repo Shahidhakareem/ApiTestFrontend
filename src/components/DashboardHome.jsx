@@ -14,7 +14,12 @@ import HistoryPanel from "./History";
 function DashboardHome({ session }) {
   const [activeSection, setActiveSection] = useState("Collections"); // ← NEW
 const [selectedRequest, setSelectedRequest] = useState(null);
+const [historyKey, setHistoryKey] = useState(0);
 
+const handleHistoryChange = () => {
+    // Increment the key to force HistoryPanel to re-render and re-fetch data
+    setHistoryKey(prev => prev + 1); 
+  };
   const [environments, setEnvironments] = useState([
     {
       name: "Localhost",
@@ -83,16 +88,22 @@ const handleRemoveRequest = async (id) => {
               setActiveEnv={setActiveEnv}
             />
           )}
-   {activeSection === "History" && (
-               <HistoryPanel onSelect={(req) => setSelectedRequest(req)} />
-          )}
+  {activeSection === "History" && (
+            // Use the historyKey to force HistoryPanel to remount/reload data
+            <HistoryPanel 
+                key={historyKey} 
+                onSelect={(req) => setLoadedRequest(req)} 
+            />
+        )}
           {/* MAIN REQUEST BUILDER */}
            <div className="flex-1">
-            <RequestBuilder
-              saveRequest={saveRequest}
-              collections={collections}
-              loadedRequest={loadedRequest}
-            />
+          <RequestBuilder
+            saveRequest={saveRequest}
+            collections={collections}
+            loadedRequest={loadedRequest}
+            // PASS THE REFRESH CALLBACK HERE
+            onHistoryChange={handleHistoryChange} 
+          />
           </div> *
 
 
