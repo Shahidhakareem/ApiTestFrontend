@@ -1,7 +1,8 @@
 import { useState } from "react";
 // Removed: import "../css/style.css"; // Assuming Tailwind handles all styling now
 import { supabase } from "../supabase-client";
-
+import logo from "../assets/main_logo.png";
+import { useNavigate } from "react-router-dom";
 export const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
@@ -9,6 +10,11 @@ export const Login = () => {
   const [error, setError] = useState(null); // State for error messages
   const [loading, setLoading] = useState(false); // State for loading indicator
 
+const navigate = useNavigate()
+
+  const handleLogo = () =>{
+    navigate("/")
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null); // Clear previous errors
@@ -59,7 +65,10 @@ export const Login = () => {
     // Outer container: centered, max-width, padding, light border/shadow
     <div className="flex flex-col items-center justify-center  p-4">
       <div className="w-full max-w-md bg-white border-10 border-indigo-200 p-8 rounded-lg shadow-xl">
+        <div onClick={handleLogo}> <img alt="" src={logo} className="h-30 w-auto mx-auto py-4 cursor-pointer" /></div>
+         
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+          
           {isSignUp ? "Create an Account" : "Sign in to your Account"}
         </h2>
         
