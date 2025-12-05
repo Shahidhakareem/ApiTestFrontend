@@ -9,7 +9,7 @@ const Header = () => {
   const navigate = useNavigate()
 
   const handleLogo = () =>{
-    navigate("/")
+    navigate("/login")
   }
   return (
     <div className="flex items-center justify-between p-2 h-12 border-b border-gray-200 bg-white shadow-sm">
